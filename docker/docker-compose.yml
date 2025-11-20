@@ -16,7 +16,7 @@ services:
       - postgres_data:/var/lib/postgresql/data #postgres_data_${STUDENT_ID:-student01}:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${DB_NAME:-cats_dogs_db}_${STUDENT_ID:-student01} -U ${DB_USER:-catsdogs}"]
+      test: ["CMD-SHELL", "psql -U catsdogs -d cats_dogs_db_$${STUDENT_ID} -c 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
