@@ -3,7 +3,7 @@
 🎯 PROMETHEUS METRICS - Export de métriques MLOps
 ═══════════════════════════════════════════════════════════════════════════════
 """
-from prometheus_client import Counter, Histogram, Gauge, make_asgi_app  #generate_latest
+from prometheus_client import Counter, Histogram, Gauge, generate_latest #make_asgi_app  #generate_latest
 from prometheus_fastapi_instrumentator import Instrumentator
 import os
 

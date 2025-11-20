@@ -94,9 +94,8 @@ update_db_status = None
 # ─────────────────────────────────────────────────────────────────────────────
 # 📊 IMPORT PROMETHEUS (si activé)
 # ─────────────────────────────────────────────────────────────────────────────
-from src.monitoring.prometheus_metrics import track_inference_time, update_db_status
+#from src.monitoring.prometheus_metrics import track_inference_time, update_db_status
 
-'''
 if ENABLE_PROMETHEUS:
     try:
         from src.monitoring.prometheus_metrics import (
@@ -111,7 +110,6 @@ if ENABLE_PROMETHEUS:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
         print(f"⚠️  Prometheus tracking not available: {e}")
         # 💡 Graceful degradation : app continue sans Prometheus
-'''
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 📢 IMPORT DISCORD (si activé)
@@ -294,8 +292,11 @@ async def predict_api(
         # Conversion secondes → millisecondes (plus lisible pour latence)
         # Typage int : évite JSON avec .567823478 ms
         
-        
-        track_inference_time(inference_time_ms)      
+        # ─────────────────────────────────────────────────────────────────────────
+        # ⏱️ TRACKING TEMPS D'INFÉRENCE
+        # ─────────────────────────────────────────────────────────────────────────        
+        if track_inference_time:
+            track_inference_time(inference_time_ms)
         
         # ─────────────────────────────────────────────────────────────────────
         # 📊 FORMATAGE PROBABILITÉS (pour DB)
@@ -353,6 +354,12 @@ async def predict_api(
         # ─────────────────────────────────────────────────────────────────────
         end_time = time.perf_counter()
         inference_time_ms = int((end_time - start_time) * 1000)
+
+        # ─────────────────────────────────────────────────────────────────────────
+        # ⏱️ TRACKING TEMPS D'INFÉRENCE
+        # ─────────────────────────────────────────────────────────────────────────        
+        if track_inference_time:
+            track_inference_time(inference_time_ms)
         
         # 💾 Enregistrement de l'erreur en base (audit trail)
         try:
@@ -674,9 +681,7 @@ async def health_check(db: Session = Depends(get_db)):
             update_db_status(db_connected)
             # 📊 Set cv_database_connected gauge (1 ou 0)
             # Grafana peut alerter si = 0 pendant >5min
-            
-            # Exercice 1 :
-            track_inference_time(inference_time_ms)
+
         except Exception as e:
             print(f"⚠️  Prometheus status update failed: {e}")
     
